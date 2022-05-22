@@ -1,0 +1,4 @@
+<form method="post">{% csrf_token %}
+	{{ form.as_ul }}  <!-- as_ul을 쓰면 unorderedList로 form을 rendering해줌 -->
+	<input type="submit" value="전송">
+</form>
