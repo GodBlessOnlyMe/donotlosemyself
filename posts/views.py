@@ -1,3 +1,6 @@
+from allauth.account.views import PasswordChangeView
+from django.urls import reverse
+
 from .forms import PostForm
 from django.shortcuts import render, redirect
 from .models import Post
@@ -7,7 +10,7 @@ from .models import Post
 
 
 def index(request):
-    ...
+    return render(request, "posts/index.html")
 
 
 def post_create(request):
@@ -39,3 +42,8 @@ def post_update(request):
 
 def post_delete(request):
     ...
+
+
+class CustomPasswordChangeView(PasswordChangeView):
+    def get_success_url(self):
+        return reverse("index")

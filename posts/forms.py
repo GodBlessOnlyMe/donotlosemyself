@@ -2,6 +2,7 @@
 
 from django import forms
 from django.core.exceptions import ValidationError
+from .models import User
 
 from .models import Post
 from .validators import validate_symbols
@@ -19,3 +20,13 @@ class PostForm(forms.ModelForm):
         if '*' in title:
             raise ValidationError("*는 포함될 수 없습니다.")
         return title
+
+
+class SignupForm(forms.ModelForm):
+    class Meta:
+        model = User
+        fields = ["nickname"]
+
+    def signup(self, request, user):
+        user.nickname = self.cleaned_data["nickname"]  # (1)
+        user.save()
