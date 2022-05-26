@@ -2,23 +2,26 @@
 
 from django import forms
 from django.core.exceptions import ValidationError
-from .models import User
 
-from .models import Post
-from .validators import validate_symbols
+from .models import User, Post
 
 
 class PostForm(forms.ModelForm):
-    memo = forms.CharField(max_length=80, validators=[validate_symbols])  # (1)
 
     class Meta:
         model = Post
-        fields = ["title", "content"]
+        fields = ['title', 'content']
+        widgets = {
+            'title': forms.TextInput(attrs={
+                    'class': 'title',
+                    'placeholder': '제목을 입력하세요'}),
+            'content': forms.Textarea(attrs={
+                    'placeholder': '내용을 입력하세요'})}
 
-    def clean_title(self):  # (2)
-        title = self.cleaned_data['title']  # (3)
+    def clean_title(self):
+        title = self.cleaned_data['title']
         if '*' in title:
-            raise ValidationError("*는 포함될 수 없습니다.")
+            raise ValidationError('* 는 포함될 수 없습니다.')
         return title
 
 
