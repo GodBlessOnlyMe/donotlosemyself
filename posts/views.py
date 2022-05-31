@@ -2,7 +2,7 @@ from allauth.account.views import PasswordChangeView
 from django.urls import reverse
 
 from .forms import PostForm
-from django.shortcuts import render, redirect
+from django.shortcuts import render, redirect, get_object_or_404
 from .models import Post
 
 
@@ -32,13 +32,13 @@ def post_list(request):
 
 
 def post_detail(request, post_id):
-    post = Post.objects.get(id=post_id)
+    post = get_object_or_404(Post, id=post_id)
     context = {"post": post}
     return render(request, 'posts/post_detail.html', context=context)
 
 
 def post_update(request, post_id):
-    post = Post.objects.get(id=post_id)  # (1)
+    post = get_object_or_404(Post, id=post_id)  # (1)
     if request.method == 'POST':
         post_form = PostForm(request.POST, instance=post)  # (2)
         if post_form.is_valid():  # (3)
@@ -50,7 +50,7 @@ def post_update(request, post_id):
 
 
 def post_delete(request, post_id):
-    post = Post.objects.get(id=post_id)
+    post = get_object_or_404(Post, id=post_id)
     if request.method == 'POST':
         post.delete()
         return redirect('post-list')
