@@ -4,6 +4,7 @@ from django.urls import reverse
 from .forms import PostForm
 from django.shortcuts import render, redirect, get_object_or_404
 from .models import Post
+from django.core.paginator import Paginator
 
 
 # Create your views here.
@@ -27,8 +28,12 @@ def post_create(request):
 
 def post_list(request):
     posts = Post.objects.all()
-    context = {"posts": posts}
-    return render(request, 'posts/post_list.html', context=context)
+    paginator = Paginator(posts, 6)
+    curr_page_number = request.GET.get('page')  # query string 가져옴
+    if curr_page_number is None:  # 초기엔 page number가 없을테니까
+        curr_page_number = 1
+    page = paginator.page(curr_page_number)  # page 가져오기
+    return render(request, 'posts/post_list.html', {'page': page})
 
 
 def post_detail(request, post_id):
