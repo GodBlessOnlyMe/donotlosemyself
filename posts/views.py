@@ -1,66 +1,51 @@
 from allauth.account.views import PasswordChangeView
+from django.shortcuts import render
 from django.urls import reverse
+from django.views.generic import CreateView, ListView, DetailView, UpdateView, DeleteView, RedirectView
 
 from .forms import PostForm
-from django.shortcuts import render, redirect, get_object_or_404
 from .models import Post
-from django.core.paginator import Paginator
 
 
-# Create your views here.
+class IndexRedirectView(RedirectView):
+    pattern_name = 'post-list'  # redirect할 url name
 
 
-def index(request):
-    return render(request, "posts/index.html")
-    # return redirect('post-list')  # 메인을 글목록으로 설정한 것
+def index(request):  # 로그인 창으로 보내려면 이 함수형 뷰를 사용할 것
+    return render(request, 'posts/index.html')
 
 
-def post_create(request):
-    if request.method == "POST":
-        post_form = PostForm(request.POST)
-        if post_form.is_valid():  # (1)
-            new_post = post_form.save()
-            return redirect('post-detail', post_id=new_post.id)
-    else:
-        post_form = PostForm()
-    return render(request, 'posts/post_form.html', {'form': post_form})  # (2)
+class PostCreateView(CreateView):
+    model = Post
+    form_class = PostForm
+
+    def get_success_url(self):
+        return reverse('post-detail', kwargs={'pk': self.object.id})  # (1)
 
 
-def post_list(request):
-    posts = Post.objects.all()
-    paginator = Paginator(posts, 6)
-    curr_page_number = request.GET.get('page')  # query string 가져옴
-    if curr_page_number is None:  # 초기엔 page number가 없을테니까
-        curr_page_number = 1
-    page = paginator.page(curr_page_number)  # page 가져오기
-    return render(request, 'posts/post_list.html', {'page': page})
+class PostListView(ListView):
+    model = Post
+    ordering = ['-dt_created']  # 최신글부터 보이게
+    paginate_by = 6  # pagination 단위
 
 
-def post_detail(request, post_id):
-    post = get_object_or_404(Post, id=post_id)
-    context = {"post": post}
-    return render(request, 'posts/post_detail.html', context=context)
+class PostDetailView(DetailView):
+    model = Post
 
 
-def post_update(request, post_id):
-    post = get_object_or_404(Post, id=post_id)  # (1)
-    if request.method == 'POST':
-        post_form = PostForm(request.POST, instance=post)  # (2)
-        if post_form.is_valid():  # (3)
-            post_form.save()
-            return redirect('post-detail', post_id=post.id)
-    else:  # GET-METHOD일 때
-        post_form = PostForm(instance=post)  # (4)
-    return render(request, 'posts/post_form.html', {'form': post_form})
+class PostUpdateView(UpdateView):
+    model = Post
+    form_class = PostForm
+
+    def get_success_url(self):
+        return reverse('post-detail', kwargs={'pk': self.object.id})
 
 
-def post_delete(request, post_id):
-    post = get_object_or_404(Post, id=post_id)
-    if request.method == 'POST':
-        post.delete()
-        return redirect('post-list')
-    else:
-        return render(request, 'posts/post_confirm_delete.html', {'post': post})
+class PostDeleteView(DeleteView):
+    model = Post
+
+    def get_success_url(self):
+        return reverse('post-list')
 
 
 class CustomPasswordChangeView(PasswordChangeView):

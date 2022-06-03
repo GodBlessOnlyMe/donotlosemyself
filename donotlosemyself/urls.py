@@ -21,8 +21,8 @@ from posts.views import CustomPasswordChangeView
 
 urlpatterns = [
     path("admin/", admin.site.urls),
-    path("", include("posts.urls")),
     path("", include("allauth.urls")),
+    path("", include("posts.urls")),
     path(
         "email-confirmation-done/",
         TemplateView.as_view(template_name="posts/email_confirmation_done.html"),  # (1)
